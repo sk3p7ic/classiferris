@@ -1,1 +1,5 @@
 /target
+
+/data/.venv
+/data/*.gz
+/data/*.csv
