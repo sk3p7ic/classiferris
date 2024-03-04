@@ -1,3 +1,7 @@
+mod nn {
+    pub mod layer;
+    pub mod neunet;
+}
 mod utils {
     pub mod dataloader;
     pub mod msgprinter;
