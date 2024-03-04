@@ -14,6 +14,7 @@ fn main() {
     )
     .expect("file to exist and be parsable");
     str_print("Loaded './data/mnist_train.csv'...", data_prep_timer);
+    str_print(format!("{}", train_dataset).as_str(), data_prep_timer);
     str_print("Loading './data/mnist_test.csv'...", data_prep_timer);
     let mut test_dataset = utils::dataloader::Dataset::from_file(
         "./data/mnist_test.csv",
@@ -21,6 +22,7 @@ fn main() {
     )
     .expect("file to exist and be parsable");
     str_print("Loaded './data/mnist_test.csv'...", data_prep_timer);
+    str_print(format!("{}", test_dataset).as_str(), data_prep_timer);
     str_print("Normalizing datasets...", data_prep_timer);
     train_dataset.normalize();
     test_dataset.normalize();
