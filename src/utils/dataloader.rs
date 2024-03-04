@@ -18,13 +18,16 @@ impl DatasetType {
 
 pub struct Dataset {
     pub t: DatasetType,
-    pub labels: DVector<u8>,
-    pub images: DMatrix<f32>,
+    pub labels: Vec<DVector<u8>>,
+    pub images: Vec<DMatrix<f32>>,
     pub n_items: usize,
 }
 
 impl Dataset {
-    pub fn from_file(file_path: &str, t: DatasetType) -> Result<Dataset, String> {
+    pub fn from_file(file_path: &str, t: DatasetType, batch_size: usize) -> Result<Dataset, String> {
+        if t.get_n_items() % batch_size != 0 {
+            return Err(format!("Dataset size '{}' not divisible by batch size '{}'.", t.get_n_items(), batch_size).to_string());
+        }
         let file_contents = std::fs::read_to_string(file_path)
             .expect("file to exist. Please download dataset files.");
         let labels_vec = file_contents
@@ -39,7 +42,10 @@ impl Dataset {
                     .parse::<u8>()
                     .expect("value to be valid u8.")
             })
-            .collect::<Vec<u8>>();
+            .collect::<Vec<u8>>()
+            .chunks(batch_size)
+            .map(|c| c.to_owned())
+            .collect::<Vec<Vec<u8>>>();
         let images_vec = file_contents
             .trim()
             .split('\n')
@@ -50,13 +56,20 @@ impl Dataset {
                     .map(|c| f32::from(c.trim().parse::<u8>().expect("value to be valid u8.")))
                     .collect::<Vec<f32>>()
             })
-            .collect::<Vec<Vec<f32>>>();
-        let labels = DVector::from_vec(labels_vec);
-        let images = DMatrix::from_vec(
-            t.get_n_items(),
-            784,
-            images_vec.into_iter().flatten().collect::<Vec<f32>>(),
-        );
+            .collect::<Vec<Vec<f32>>>()
+            .chunks(batch_size)
+            .map(|c| c.to_owned())
+            .collect::<Vec<Vec<Vec<f32>>>>();
+        let labels = labels_vec.into_iter()
+            .map(|c| DVector::<u8>::from_vec(c))
+            .collect();
+        let images = images_vec.into_iter()
+            .map(|c| DMatrix::<f32>::from_vec(
+                batch_size,
+                784,
+                c.into_iter().flatten().collect()
+            ))
+            .collect();
         Ok(Dataset {
             t,
             labels,
@@ -66,7 +79,7 @@ impl Dataset {
     }
 
     pub fn normalize(&mut self) {
-        self.images.apply(|px| *px /= 255f32);
+        self.images.iter_mut().for_each(|img_v| img_v.apply(|px| *px /= 255f32));
     }
 }
 
@@ -75,13 +88,15 @@ impl std::fmt::Display for Dataset {
         f.write_str(
             format!(
                 "Dataset ({:?}) {{
-            labels: {:?},
-            images: {:?},
+            labels: {}x{:?},
+            images: {}x{:?},
             n_items: {}
         }}",
                 self.t,
-                self.labels.shape(),
-                self.images.shape(),
+                self.labels.len(),
+                self.labels[0].shape(),
+                self.images.len(),
+                self.images[0].shape(),
                 self.n_items
             )
             .as_str(),

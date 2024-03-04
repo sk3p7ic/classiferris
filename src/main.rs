@@ -16,6 +16,7 @@ fn main() {
     let mut train_dataset = utils::dataloader::Dataset::from_file(
         "./data/mnist_train.csv",
         utils::dataloader::DatasetType::Train,
+        40
     )
     .expect("file to exist and be parsable");
     str_print("Loaded './data/mnist_train.csv'...", data_prep_timer);
@@ -24,6 +25,7 @@ fn main() {
     let mut test_dataset = utils::dataloader::Dataset::from_file(
         "./data/mnist_test.csv",
         utils::dataloader::DatasetType::Test,
+        40
     )
     .expect("file to exist and be parsable");
     str_print("Loaded './data/mnist_test.csv'...", data_prep_timer);
