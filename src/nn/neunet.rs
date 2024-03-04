@@ -1,6 +1,6 @@
 use super::layer::Layer;
 
-struct CNN {
+pub struct CNN {
     layers: Vec<Layer>,
 }
 
