@@ -6,9 +6,9 @@ mod utils {
     pub mod dataloader;
     pub mod msgprinter;
 }
-use nn::{layer::Layer, neunet::CNN};
-use std::time::Instant;
+use nn::{layer::{Layer, LayerType, ActivationFunction}, neunet::CNN};
 use utils::msgprinter::str_print;
+use std::time::Instant;
 
 fn main() {
     let data_prep_timer = Instant::now();
@@ -36,8 +36,10 @@ fn main() {
     str_print("Done.", data_prep_timer);
     str_print("Building neural network...", data_prep_timer);
     let mut nn = CNN::init();
-    nn.add_layer(Layer::new(784, 392, nn::layer::LayerType::Input));
-    nn.add_layer(Layer::new(392, 98, nn::layer::LayerType::Hidden));
-    nn.add_layer(Layer::new(98, 10, nn::layer::LayerType::Hidden));
-    nn.add_layer(Layer::new(10, 1, nn::layer::LayerType::Output));
+    nn.add_layer(Layer::new(784, 392, LayerType::Input, ActivationFunction::None));
+    nn.add_layer(Layer::new(392, 98, LayerType::Hidden, ActivationFunction::ReLU));
+    nn.add_layer(Layer::new(98, 10, LayerType::Hidden, ActivationFunction::ReLU));
+    nn.add_layer(Layer::new(10, 1, LayerType::Output, ActivationFunction::Softmax));
+    str_print("Added layers", data_prep_timer);
+    str_print(format!("{}", nn).as_str(), data_prep_timer);
 }
