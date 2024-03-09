@@ -1,4 +1,4 @@
-use nalgebra::{DMatrix, DVector};
+use nalgebra::DMatrix;
 use rand::Rng;
 
 #[derive(Debug)]
@@ -17,7 +17,7 @@ pub struct LayerShape {
 pub struct Layer {
     activation: ActivationFunction,
     weights: DMatrix<f32>,
-    biases: DVector<f32>,
+    biases: DMatrix<f32>,
     shape: LayerShape,
     t: LayerType,
 }
@@ -25,7 +25,7 @@ pub struct Layer {
 impl Layer {
     pub fn new(input_neurons: usize, output_neurons: usize, t: LayerType, activation: ActivationFunction) -> Layer {
         let mut weights = DMatrix::zeros(output_neurons, input_neurons);
-        let mut biases = DVector::zeros(output_neurons);
+        let mut biases = DMatrix::zeros(1, output_neurons);
         let shape = LayerShape {
             input: input_neurons,
             output: output_neurons,
@@ -40,6 +40,10 @@ impl Layer {
             shape,
             t,
         }
+    }
+
+    pub fn forward(&self, input: DMatrix<f32>) -> DMatrix<f32> {
+        (&self.weights * input) + &self.biases
     }
 }
 
